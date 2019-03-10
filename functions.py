@@ -8,15 +8,19 @@ class Client():
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.address = ('localhost',8000)
 
+
     def connect(self):
         self.s.connect(self.address)
 
     def recieveAndPrintMessage(self):
-        
         print(message)
 
     def closeConnection(self):
         self.s.close()
+
+    def getFunction(self):
+        self.function = self.s.recv(1024).decode()
+
 
     def getData(self):
         gb = bytes(0)
@@ -48,12 +52,12 @@ class Host():
         self.s.bind(self.address)
         self.s.listen(1)
         self.no_of_clients = no_of_clients
-        self.clients = []
-        self.data = np.asarray(cv2.imread('img.jpg'),dtype = "int32")
+        self.clients = [] 
+        t = open("clientFunction.py","r")
+        self.clientFunction = t.read()
+        # self.data = np.asarray(cv2.imread('img.jpg'),dtype = "int32")
         # self.data = np.random.rand(4,2,3)
     
-    def printData(self):
-        print(self.data.shape)
 
     def connectToClients(self):
         while(len(self.clients) < self.no_of_clients):
@@ -67,6 +71,11 @@ class Host():
     def closeAll(self):
         for i in range(len(self.clients)):
             self.clients[i][0].close()
+
+
+    def sendFunctionToAll(self):
+        for i in range(len(self.clients)):
+            self.clients[i][0].send(self.clientFunction.encode())
 
     def sendData(self):
         t = int(self.data.shape[0]/self.no_of_clients)
